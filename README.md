@@ -1,4 +1,4 @@
-## Fork ok https://github.com/VKCOM/noverify
+## Fork of https://github.com/VKCOM/noverify
 
 ## NoVerify [![Build Status](https://travis-ci.org/VKCOM/noverify.svg?branch=master)](https://travis-ci.org/VKCOM/noverify)
 
