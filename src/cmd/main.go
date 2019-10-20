@@ -14,14 +14,14 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/VKCOM/noverify/src/cmd/stubs"
-	"github.com/VKCOM/noverify/src/langsrv"
-	"github.com/VKCOM/noverify/src/lintdebug"
-	"github.com/VKCOM/noverify/src/linter"
-	"github.com/VKCOM/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/cmd/stubs"
+	"github.com/Levsha-cc/noverify/src/langsrv"
+	"github.com/Levsha-cc/noverify/src/lintdebug"
+	"github.com/Levsha-cc/noverify/src/linter"
+	"github.com/Levsha-cc/noverify/src/meta"
 )
 
-// Line below implies that we have `https://github.com/VKCOM/phpstorm-stubs.git` cloned
+// Line below implies that we have `https://github.com/Levsha-cc/phpstorm-stubs.git` cloned
 // to the `./src/cmd/stubs/phpstorm-stubs`.
 //
 //go:generate go-bindata -pkg stubs -nometadata -o ./stubs/phpstorm_stubs.go -ignore=\.idea -ignore=\.git ./stubs/phpstorm-stubs/...

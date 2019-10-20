@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VKCOM/noverify/src/git"
-	"github.com/VKCOM/noverify/src/linter"
-	"github.com/VKCOM/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/git"
+	"github.com/Levsha-cc/noverify/src/linter"
+	"github.com/Levsha-cc/noverify/src/meta"
 )
 
 func gitParseUntracked() []*linter.Report {

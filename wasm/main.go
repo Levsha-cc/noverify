@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"syscall/js"
 
-	"github.com/VKCOM/noverify/src/linter"
-	"github.com/VKCOM/noverify/src/meta"
-	"github.com/VKCOM/noverify/src/vscode"
+	"github.com/Levsha-cc/noverify/src/linter"
+	"github.com/Levsha-cc/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/vscode"
 	"github.com/z7zmey/php-parser/node"
 )
 

@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/VKCOM/noverify/src/linter"
+	"github.com/Levsha-cc/noverify/src/linter"
 )
 
 const allNonMaybe = "<all-non-maybe>"

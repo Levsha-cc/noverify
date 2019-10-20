@@ -1,8 +1,8 @@
 package langsrv
 
 import (
-	"github.com/VKCOM/noverify/src/meta"
-	"github.com/VKCOM/noverify/src/state"
+	"github.com/Levsha-cc/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/state"
 	"github.com/z7zmey/php-parser/node"
 	"github.com/z7zmey/php-parser/walker"
 )

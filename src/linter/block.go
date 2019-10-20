@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/VKCOM/noverify/src/meta"
-	"github.com/VKCOM/noverify/src/phpdoc"
-	"github.com/VKCOM/noverify/src/solver"
+	"github.com/Levsha-cc/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/phpdoc"
+	"github.com/Levsha-cc/noverify/src/solver"
 	"github.com/z7zmey/php-parser/freefloating"
 	"github.com/z7zmey/php-parser/node"
 	"github.com/z7zmey/php-parser/node/expr"
@@ -293,18 +293,28 @@ func (b *BlockWalker) EnterNode(w walker.Walkable) (res bool) {
 		res = b.handleArrayItems(s, s.Items)
 	case *stmt.Foreach:
 		res = b.handleForeach(s)
+	case *stmt.AltForeach:
+		res = b.handleAltForeach(s)
 	case *stmt.For:
 		res = b.handleFor(s)
+	case *stmt.AltFor:
+		res = b.handleAltFor(s)
 	case *stmt.While:
 		res = b.handleWhile(s)
+	case *stmt.AltWhile:
+		res = b.handleAltWhile(s)
 	case *stmt.Do:
 		res = b.handleDo(s)
 	case *stmt.If:
 		// TODO: handle constant if expressions
 		// TODO: maybe try to handle when variables are defined and used with the same condition
 		res = b.handleIf(s)
+	case *stmt.AltIf:
+		res = b.handleAltIf(s)
 	case *stmt.Switch:
 		res = b.handleSwitch(s)
+	case *stmt.AltSwitch:
+		res = b.handleAltSwitch(s)
 	case *expr.FunctionCall:
 		res = b.handleFunctionCall(s)
 	case *expr.MethodCall:
@@ -1327,7 +1337,79 @@ func (b *BlockWalker) handleForeach(s *stmt.Foreach) bool {
 	return false
 }
 
+func (b *BlockWalker) handleAltForeach(s *stmt.AltForeach) bool {
+	// TODO: add reference semantics to foreach analyze as well
+
+	b.handleVariableNode(s.Key, nil, "foreach_key")
+	if list, ok := s.Variable.(*expr.List); ok {
+		for _, item := range list.Items {
+			v, ok := item.(*expr.ArrayItem).Val.(*expr.Variable)
+			if !ok {
+				continue
+			}
+			b.handleVariableNode(v, nil, "foreach_value")
+		}
+	} else {
+		b.handleVariableNode(s.Variable, nil, "foreach_value")
+	}
+
+	// expression is always executed and is executed in base context
+	if s.Expr != nil {
+		s.Expr.Walk(b)
+		solver.ExprTypeLocalCustom(b.ctx.sc, b.r.st, s.Expr, b.ctx.customTypes).Iterate(func(typ string) {
+			b.handleVariableNode(s.Variable, meta.NewTypesMap(meta.WrapElemOf(typ)), "foreach_value")
+		})
+	}
+
+	// foreach body can do 0 cycles so we need a separate context for that
+	if s.Stmt != nil {
+		ctx := b.withNewContext(func() {
+			b.ctx.innermostLoop = loopFor
+			b.ctx.insideLoop = true
+			if _, ok := s.Stmt.(*stmt.StmtList); !ok {
+				b.addStatement(s.Stmt)
+			}
+			s.Stmt.Walk(b)
+		})
+
+		b.maybeAddAllVars(ctx.sc, "foreach body")
+		b.propagateFlags(ctx)
+	}
+
+	return false
+}
+
 func (b *BlockWalker) handleFor(s *stmt.For) bool {
+	for _, v := range s.Init {
+		b.addStatement(v)
+		v.Walk(b)
+	}
+
+	for _, v := range s.Cond {
+		v.Walk(b)
+	}
+
+	for _, v := range s.Loop {
+		b.addStatement(v)
+		v.Walk(b)
+	}
+
+	// for body can do 0 cycles so we need a separate context for that
+	if s.Stmt != nil {
+		ctx := b.withNewContext(func() {
+			b.ctx.innermostLoop = loopFor
+			b.ctx.insideLoop = true
+			s.Stmt.Walk(b)
+		})
+
+		b.maybeAddAllVars(ctx.sc, "while body")
+		b.propagateFlags(ctx)
+	}
+
+	return false
+}
+
+func (b *BlockWalker) handleAltFor(s *stmt.AltFor) bool {
 	for _, v := range s.Init {
 		b.addStatement(v)
 		v.Walk(b)
@@ -1415,6 +1497,25 @@ func (b *BlockWalker) maybeAddAllVars(sc *meta.Scope, reason string) {
 }
 
 func (b *BlockWalker) handleWhile(s *stmt.While) bool {
+	if s.Cond != nil {
+		s.Cond.Walk(b)
+	}
+
+	// while body can do 0 cycles so we need a separate context for that
+	if s.Stmt != nil {
+		ctx := b.withNewContext(func() {
+			b.ctx.innermostLoop = loopFor
+			b.ctx.insideLoop = true
+			s.Stmt.Walk(b)
+		})
+		b.maybeAddAllVars(ctx.sc, "while body")
+		b.propagateFlags(ctx)
+	}
+
+	return false
+}
+
+func (b *BlockWalker) handleAltWhile(s *stmt.AltWhile) bool {
 	if s.Cond != nil {
 		s.Cond.Walk(b)
 	}
@@ -1670,6 +1771,97 @@ func (b *BlockWalker) handleIf(s *stmt.If) bool {
 	return false
 }
 
+func (b *BlockWalker) handleAltIf(s *stmt.AltIf) bool {
+	var varsToDelete []*expr.Variable
+	// Remove all isset'ed variables after we're finished with this if statement.
+	defer func() {
+		for _, v := range varsToDelete {
+			b.ctx.sc.DelVar(v, "isset/!empty")
+		}
+	}()
+	walkCond := func(cond node.Node) {
+		a := &andWalker{b: b}
+		cond.Walk(a)
+		varsToDelete = append(varsToDelete, a.varsToDelete...)
+	}
+
+	// first condition is always executed, so run it in base context
+	if s.Cond != nil {
+		walkCond(s.Cond)
+	}
+
+	var contexts []*blockContext
+
+	walk := func(n node.Node) (links int) {
+		// handle if (...) smth(); else other_thing(); // without braces
+		if els, ok := n.(*stmt.Else); ok {
+			b.addStatement(els.Stmt)
+		} else if elsif, ok := n.(*stmt.ElseIf); ok {
+			b.addStatement(elsif.Stmt)
+		} else {
+			b.addStatement(n)
+		}
+
+		ctx := b.withNewContext(func() {
+			if elsif, ok := n.(*stmt.ElseIf); ok {
+				walkCond(elsif.Cond)
+			}
+			n.Walk(b)
+			b.r.addScope(n, b.ctx.sc)
+		})
+
+		contexts = append(contexts, ctx)
+
+		if ctx.exitFlags != 0 {
+			return 0
+		}
+
+		return 1
+	}
+
+	linksCount := 0
+
+	if s.Stmt != nil {
+		linksCount += walk(s.Stmt)
+	} else {
+		linksCount++
+	}
+
+	for _, n := range s.ElseIf {
+		linksCount += walk(n)
+	}
+
+	if s.Else != nil {
+		linksCount += walk(s.Else)
+	} else {
+		linksCount++
+	}
+
+	b.propagateFlagsFromBranches(contexts, linksCount)
+
+	varTypes := make(map[string]*meta.TypesMap, b.ctx.sc.Len())
+	defCounts := make(map[string]int, b.ctx.sc.Len())
+
+	for _, ctx := range contexts {
+		if ctx.exitFlags != 0 {
+			continue
+		}
+
+		ctx.sc.Iterate(func(nm string, typ *meta.TypesMap, alwaysDefined bool) {
+			varTypes[nm] = varTypes[nm].Append(typ)
+			if alwaysDefined {
+				defCounts[nm]++
+			}
+		})
+	}
+
+	for nm, types := range varTypes {
+		b.ctx.sc.AddVarName(nm, types, "all branches", defCounts[nm] == linksCount)
+	}
+
+	return false
+}
+
 func (b *BlockWalker) getCaseStmts(c node.Node) (cond node.Node, list []node.Node) {
 	switch c := c.(type) {
 	case *stmt.Case:
@@ -1704,6 +1896,116 @@ func (b *BlockWalker) iterateNextCases(cases []node.Node, startIdx int) {
 }
 
 func (b *BlockWalker) handleSwitch(s *stmt.Switch) bool {
+	// first condition is always executed, so run it in base context
+	if s.Cond != nil {
+		s.Cond.Walk(b)
+	}
+
+	var contexts []*blockContext
+
+	linksCount := 0
+	haveDefault := false
+	breakFlags := FlagBreak | FlagContinue
+
+	for idx, c := range s.CaseList.Cases {
+		var list []node.Node
+
+		cond, list := b.getCaseStmts(c)
+		if cond == nil {
+			haveDefault = true
+		} else {
+			cond.Walk(b)
+		}
+
+		// allow empty case body without "break;"
+		// nothing new can be defined here so we just skip it
+		if len(list) == 0 {
+			continue
+		}
+
+		ctx := b.withNewContext(func() {
+			b.ctx.innermostLoop = loopSwitch
+			for _, s := range list {
+				if s != nil {
+					b.addStatement(s)
+					s.Walk(b)
+				}
+			}
+
+			// allow to omit "break;" in the final statement
+			if idx != len(s.CaseList.Cases)-1 && b.ctx.exitFlags == 0 {
+				// allow the fallthrough if appropriate comment is present
+				nextCase := s.CaseList.Cases[idx+1]
+				if !b.caseHasFallthroughComment(nextCase) {
+					b.r.Report(c, LevelInformation, "caseBreak", "Add break or '// fallthrough' to the end of the case")
+				}
+			}
+
+			if (b.ctx.exitFlags & (^breakFlags)) == 0 {
+				linksCount++
+
+				if b.ctx.exitFlags == 0 {
+					b.iterateNextCases(s.CaseList.Cases, idx+1)
+				}
+			}
+		})
+
+		contexts = append(contexts, ctx)
+	}
+
+	if !haveDefault {
+		linksCount++
+	}
+
+	// whether or not all branches exit (return, throw, etc)
+	allExit := false
+	prematureExitFlags := 0
+
+	if len(contexts) > 0 && haveDefault {
+		allExit = true
+
+		for _, ctx := range contexts {
+			cleanFlags := ctx.exitFlags & (^breakFlags)
+			if cleanFlags == 0 {
+				allExit = false
+			} else {
+				prematureExitFlags |= cleanFlags
+			}
+			b.ctx.containsExitFlags |= ctx.containsExitFlags
+		}
+	}
+
+	if allExit {
+		b.ctx.exitFlags |= prematureExitFlags
+	}
+
+	varTypes := make(map[string]*meta.TypesMap, b.ctx.sc.Len())
+	defCounts := make(map[string]int, b.ctx.sc.Len())
+
+	for _, ctx := range contexts {
+		b.propagateFlags(ctx)
+
+		cleanFlags := ctx.exitFlags & (^breakFlags)
+		if cleanFlags != 0 {
+			continue
+		}
+
+		ctx.sc.Iterate(func(nm string, typ *meta.TypesMap, alwaysDefined bool) {
+			varTypes[nm] = varTypes[nm].Append(typ)
+			if alwaysDefined {
+				defCounts[nm]++
+			}
+		})
+	}
+
+	for nm, types := range varTypes {
+		b.ctx.sc.AddVarName(nm, types, "all cases", defCounts[nm] == linksCount)
+	}
+
+	return false
+}
+
+func (b *BlockWalker) handleAltSwitch(s *stmt.AltSwitch) bool {
 	// first condition is always executed, so run it in base context
 	if s.Cond != nil {
 		s.Cond.Walk(b)

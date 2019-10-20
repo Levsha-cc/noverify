@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/VKCOM/noverify/src/solver"
+	"github.com/Levsha-cc/noverify/src/solver"
 	"github.com/z7zmey/php-parser/node"
 	"github.com/z7zmey/php-parser/printer"
 	"github.com/z7zmey/php-parser/walker"

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/VKCOM/noverify/src/git"
+	"github.com/Levsha-cc/noverify/src/git"
 )
 
 const (

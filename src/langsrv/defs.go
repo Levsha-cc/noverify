@@ -3,11 +3,11 @@ package langsrv
 import (
 	"fmt"
 
-	"github.com/VKCOM/noverify/src/lintdebug"
-	"github.com/VKCOM/noverify/src/meta"
-	"github.com/VKCOM/noverify/src/solver"
-	"github.com/VKCOM/noverify/src/state"
-	"github.com/VKCOM/noverify/src/vscode"
+	"github.com/Levsha-cc/noverify/src/lintdebug"
+	"github.com/Levsha-cc/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/solver"
+	"github.com/Levsha-cc/noverify/src/state"
+	"github.com/Levsha-cc/noverify/src/vscode"
 	"github.com/z7zmey/php-parser/node"
 	"github.com/z7zmey/php-parser/node/expr"
 	"github.com/z7zmey/php-parser/node/name"

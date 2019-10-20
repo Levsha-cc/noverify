@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/VKCOM/noverify/src/cmd"
+	"github.com/Levsha-cc/noverify/src/cmd"
 )
 
 // Build* заполняются при сборке go build -ldflags

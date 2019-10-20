@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VKCOM/noverify/src/git"
-	"github.com/VKCOM/noverify/src/inputs"
-	"github.com/VKCOM/noverify/src/lintdebug"
-	"github.com/VKCOM/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/git"
+	"github.com/Levsha-cc/noverify/src/inputs"
+	"github.com/Levsha-cc/noverify/src/lintdebug"
+	"github.com/Levsha-cc/noverify/src/meta"
 	"github.com/z7zmey/php-parser/node"
 	"github.com/z7zmey/php-parser/php7"
 )

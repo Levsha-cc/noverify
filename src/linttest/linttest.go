@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/VKCOM/noverify/src/linter"
-	"github.com/VKCOM/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/linter"
+	"github.com/Levsha-cc/noverify/src/meta"
 	"github.com/z7zmey/php-parser/node"
 )
 

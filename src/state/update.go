@@ -1,8 +1,8 @@
 package state
 
 import (
-	"github.com/VKCOM/noverify/src/meta"
-	"github.com/VKCOM/noverify/src/solver"
+	"github.com/Levsha-cc/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/solver"
 	"github.com/z7zmey/php-parser/node"
 	"github.com/z7zmey/php-parser/node/name"
 	"github.com/z7zmey/php-parser/node/stmt"

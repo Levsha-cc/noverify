@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/VKCOM/noverify/src/linter"
-	"github.com/VKCOM/noverify/src/linttest"
-	"github.com/VKCOM/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/linter"
+	"github.com/Levsha-cc/noverify/src/linttest"
+	"github.com/Levsha-cc/noverify/src/meta"
 )
 
 func TestCallStaticParent(t *testing.T) {

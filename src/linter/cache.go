@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VKCOM/noverify/src/meta"
+	"github.com/Levsha-cc/noverify/src/meta"
 )
 
 // cacheVersions is a magic number that helps to distinguish incompatible caches.

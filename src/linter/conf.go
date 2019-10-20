@@ -3,7 +3,7 @@ package linter
 import (
 	"regexp"
 
-	"github.com/VKCOM/noverify/src/inputs"
+	"github.com/Levsha-cc/noverify/src/inputs"
 )
 
 var (

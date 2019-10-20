@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/VKCOM/noverify/src/linttest"
+	"github.com/Levsha-cc/noverify/src/linttest"
 )
 
 func TestAssignmentAsExpression(t *testing.T) {

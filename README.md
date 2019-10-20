@@ -1,6 +1,6 @@
-## Fork of https://github.com/VKCOM/noverify
+## Fork of https://github.com/Levsha-cc/noverify
 
-## NoVerify [![Build Status](https://travis-ci.org/VKCOM/noverify.svg?branch=master)](https://travis-ci.org/VKCOM/noverify)
+## NoVerify [![Build Status](https://travis-ci.org/Levsha-cc/noverify.svg?branch=master)](https://travis-ci.org/Levsha-cc/noverify)
 
 NoVerify is a linter for PHP: it searches for potential problems in your code.
 It allows to write your own rules as well and it has no config: all reports
@@ -52,7 +52,7 @@ In order to install NoVerify, you will need the Go toolchain (https://golang.org
 Once go is installed, you need to execute the following:
 
 ```sh
-$ go get -u github.com/VKCOM/noverify
+$ go get -u github.com/Levsha-cc/noverify
 ```
 
 Your noverify binary will be located at `$GOPATH/bin/noverify`, usually this
@@ -61,7 +61,7 @@ translates to `$HOME/go/bin/noverify`.
 If you have patience, consider doing these steps to get a binary with version info:
 
 ```bash
-cd src/github.com/VKCOM/noverify
+cd src/github.com/Levsha-cc/noverify
 make install
 ```
 
@@ -82,7 +82,7 @@ Cache dir is optional, but recommended. Next launch would be much faster with ca
 By default, "embedded" phpstorm-stubs are used.
 If there is some error during the NoVerify run, like "failed to load embedded stubs", try
 to provide explicit (non-empty) `-stubs-dir` argument. That argument expects a path to a cloned
-phpstorm-stubs repository. You can use either the [upstream version](https://github.com/JetBrains/phpstorm-stubs) or [VKCOM fork](https://github.com/VKCOM/phpstorm-stubs) that contains
+phpstorm-stubs repository. You can use either the [upstream version](https://github.com/JetBrains/phpstorm-stubs) or [Levsha-cc fork](https://github.com/Levsha-cc/phpstorm-stubs) that contains
 several fixes that are important for static analysis.
 
 Running NoVerify with custom phpstorm-stubs can look like this:

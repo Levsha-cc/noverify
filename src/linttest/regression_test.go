@@ -3,7 +3,7 @@ package linttest_test
 import (
 	"testing"
 
-	"github.com/VKCOM/noverify/src/linttest"
+	"github.com/Levsha-cc/noverify/src/linttest"
 )
 
 func TestIssue1(t *testing.T) {
