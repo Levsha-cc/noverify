@@ -1,3 +1,5 @@
+## Fork ok https://github.com/VKCOM/noverify
+
 ## NoVerify [![Build Status](https://travis-ci.org/VKCOM/noverify.svg?branch=master)](https://travis-ci.org/VKCOM/noverify)
 
 NoVerify is a linter for PHP: it searches for potential problems in your code.
